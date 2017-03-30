@@ -18,28 +18,32 @@ int main()
     std::cout << "Loading secret enclave ...";
 
     ret = sgx_create_enclave(ENCLAVE_NAME, SGX_DEBUG_FLAG, &token, &updated, \
-                             &global_eid, NULL);
-    
+            &global_eid, NULL);
+
     if(ret != SGX_SUCCESS){
         std::cerr << "FAILED TO CREATE ENCLAVE. CODE: ";
         std::cerr << std::hex << ret << std::endl;
+        return 1;
     }
-    std::cout << "\n";
-    std::cout << "Top Secret Number Guess: ";
-    std::cin >> guess; 
-    
-    ret =  ecall_Guess(global_eid, guess, &answer);
-    if( ret != SGX_SUCCESS){
-        std::cerr << "ENCLAVE FAILURE!!!\n";
-        std::cerr << ret << std::endl;
-    }
-    std::cout << "Answer: " << answer << std::endl;
-    if( answer < 0) {
-        std::cout << "Bad Guess -- Too low.\n";
-    } else if( answer==0 ) {
-        std::cout << "Good Guess!!!\n";
-    } else if(answer >0) {
-        std::cout << "Bad Guess -- Too high.\n";  
+    std::cout << "\nWelcome to Top Secret Number Guess\n";
+    std::cout << "The number is between 0 and 255.\n";
+
+    while(true){
+        std::cout << "Enter Guess: ";
+        std::cin >> guess; 
+        ret =  ecall_Guess(global_eid, guess, &answer);
+        if( ret != SGX_SUCCESS){
+            std::cerr << "ENCLAVE FAILURE!!!\n";
+            std::cerr << ret << std::endl;
+        }
+        std::cout << "Answer: " << answer << std::endl;
+        if( answer < 0) {
+            std::cout << "Bad Guess -- Too low.\n";
+        } else if( answer==0 ) {
+            std::cout << "Good Guess!!!\n";
+        } else if(answer >0) {
+            std::cout << "Bad Guess -- Too high.\n";  
+        }
     }
     return 0;
 }
