@@ -6,6 +6,10 @@
 #define ENCLAVE_NAME "enclave.signed.so"
 sgx_enclave_id_t global_eid = 0;
 
+void oPrintStatus(sgx_status_t code){
+    std::cout << "Enclave returned status: " << code << std::endl;;
+}
+
 int main()
 {
     sgx_status_t ret = SGX_SUCCESS;

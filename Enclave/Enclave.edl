@@ -4,5 +4,9 @@ enclave {
     trusted {
     	public void ecall_Guess(int guess, [out]int* answer);
     };
+    
+    untrusted {
+        void oPrintStatus(sgx_status_t statusCode);
+    };
 
 };

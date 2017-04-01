@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "Enclave_t.h"
 #include "sgx_trts.h"
 #include "sgx_tae_service.h"
@@ -7,17 +8,22 @@ bool initialized = false;
 sgx_mc_uuid_t mcid;
 uint32_t mc=88;
 
+
 bool init()
 {
     sgx_status_t ret= SGX_SUCCESS;
+
     ret = sgx_create_pse_session();
-    if(ret != SGX_SUCCESS){return false;}
+    if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
+    oPrintStatus(ret);
 
     ret = sgx_create_monotonic_counter(&mcid, &mc); 
     if(ret != SGX_SUCCESS){return false;}
+    oPrintStatus(ret);
 
     ret = sgx_increment_monotonic_counter(&mcid, &mc);
     if(ret != SGX_SUCCESS){return false;}
+    oPrintStatus(ret);
 
     initialized = true;
     return true; 
@@ -32,8 +38,6 @@ void ecall_Guess(int guess, int *answer)
         }
     }
     sgx_increment_monotonic_counter(&mcid, &mc);
-    *answer = mc;
-    return;
 
     if(guess < secret_num){ 
         *answer = -1;
