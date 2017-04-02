@@ -3,19 +3,24 @@
 #include "sgx_trts.h"
 #include "sgx_tae_service.h"
 
-int secret_num = 4;
+int secret_num = 0;
 bool initialized = false;
 sgx_mc_uuid_t mcid;
 uint32_t mc=0;
 sgx_time_t timer_start;
 sgx_time_source_nonce_t nonce;
 
-#define TIME_LIMIT 10    //~seconds
-#define ATTEMPT_LIMIT 3
+#define TIME_LIMIT 30    //~seconds
+#define ATTEMPT_LIMIT 8
 
 bool init()
 {
+    unsigned char rand;
     sgx_status_t ret = SGX_SUCCESS;
+
+    ret = sgx_read_rand(&rand , 1);
+    if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
+    secret_num = (int) rand;
 
     ret = sgx_create_pse_session();
     if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
