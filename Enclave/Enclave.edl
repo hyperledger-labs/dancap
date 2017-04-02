@@ -2,7 +2,7 @@ enclave {
     from "sgx_tae_service.edl" import *;	
 
     trusted {
-    	public void ecall_Guess(int guess, [out]int* answer);
+    	public void ecall_Guess(int guess, [out]int* response);
     };
     
     untrusted {
