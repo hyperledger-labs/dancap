@@ -10,6 +10,18 @@ void oPrintStatus(sgx_status_t code){
     std::cout << "Enclave returned status: " << code << std::endl;;
 }
 
+void printErrorCode(int code){
+    switch(code){
+        case 100: std::cout << "Initialization Failure\n"; break;
+        case 110: std::cout << "Increment Counter Failure\n"; break;
+        case 120: std::cout << "Get Time Failure\n"; break;
+        case 130: std::cout << "Attempt limit exceeded.\n"; break;
+        case 140: std::cout << "Spacetime Anomaly check tardis diagnostics.\n"; break;
+        case 150: std::cout << "Time limit exceeded. You are too slow.\n"; break;
+        default: std::cout << "Unknown Error\n";
+    }
+}
+
 int main()
 {
     sgx_status_t ret = SGX_SUCCESS;
@@ -43,7 +55,7 @@ int main()
 
         //Check failure condition
         if( response > 99 ) { 
-            std::cout << "FAILURE: " << response << std::endl;
+            printErrorCode(response); 
             break;
         }
         //Check hints
