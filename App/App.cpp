@@ -56,6 +56,7 @@ int main()
         //Check failure condition
         if( response > 99 ) { 
             printErrorCode(response); 
+            std::cout << "Response: " << response << std::endl;
             break;
         }
         //Check hints

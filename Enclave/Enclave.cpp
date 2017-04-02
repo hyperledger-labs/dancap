@@ -23,9 +23,6 @@ bool init()
     ret = sgx_create_monotonic_counter(&mcid, &mc); 
     if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
 
-    ret = sgx_increment_monotonic_counter(&mcid, &mc);
-    if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
-
     ret = sgx_get_trusted_time(&timer_start, &nonce);
     if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
 
