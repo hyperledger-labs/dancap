@@ -1,0 +1,6 @@
+#!/bin/sh
+docker run \
+    --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
+    -v $(pwd):/project/numguess \
+    -it numguess-dev-env /bin/bash \
+    -c 'cd /project/numguess; exec "${SHELL:-sh}"' 

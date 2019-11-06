@@ -1,0 +1,69 @@
+# Description:
+#   Creates a container that can build libsnark and enable development
+#   from the host by mapping the directory between the host and the container.
+#
+#
+# Build docker image:
+#   (From the root directory of the repo)
+#   $ docker build . -f docker/dev-env -t numguess
+#
+# Run interactive container for libsnark compilation and execution
+#   (From the root directory of the repo)
+#   $ docker run -v $(pwd):/project/numguess -it numguess /bin/bash
+#
+
+
+FROM ubuntu:bionic
+
+WORKDIR /root
+
+RUN apt-get update && \
+    apt-get install -y \
+    wget \
+    unzip \
+    curl \
+    protobuf-compiler \
+    libprotobuf-dev \
+    build-essential \
+    cmake \
+    pkg-config \
+    gdb \
+    vim \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+#    git \
+#    libgmp3-dev \
+#    libprocps4-dev \
+#    python-markdown \
+#    libboost-all-dev \
+#    libssl-dev \
+
+# SGX common library and SDK are installed in /opt/intel directory.
+# Installation of SGX libsgx-common packages requires /etc/init directory. 
+# In docker image this directory doesn't exist.
+# Hence creating /etc/init directory.
+RUN mkdir -p /opt/intel \
+ && mkdir -p /etc/init
+WORKDIR /opt/intel
+
+# Install SGX common library
+RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb \
+ && dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+
+# Install SGX SDK
+RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && chmod +x sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && echo "yes" | ./sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && rm sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
+
+ 
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV TCF_HOME=/project/TrustedComputeFramework
+ENV SGX_SSL=/opt/intel/sgxssl
+ENV SGX_SDK=/opt/intel/sgxsdk
+ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
+ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$SGX_SDK/sdk_libs

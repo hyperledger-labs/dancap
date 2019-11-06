@@ -1,0 +1,3 @@
+#!/bin/sh
+docker build . -f docker/dev-env -t numguess-dev-env
+
