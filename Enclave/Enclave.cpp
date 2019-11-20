@@ -1,12 +1,22 @@
 #include "stdio.h"
 #include "Enclave_t.h"
 #include "sgx_trts.h"
+#include "sgx_utils.h"
 
 int secret_num = 0;
 bool initialized = false;
 
 #define TIME_LIMIT 30    //~seconds
 #define ATTEMPT_LIMIT 8
+
+bool attest()
+{
+    sgx_status_t ret = SGX_SUCCESS;
+    sgx_report_t report;
+    sgx_create_report(NULL, NULL, &report);
+    if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
+    return true;
+}
 
 bool init()
 {
@@ -17,13 +27,17 @@ bool init()
     if(ret != SGX_SUCCESS){oPrintStatus(ret); return false;}
     secret_num = (int) rand;
 
-   initialized = true;
-    return true; 
+    initialized = attest();
+    return initialized; 
 }
 
 void ecall_Guess(int guess, int *response)
 {
     sgx_status_t ret = SGX_SUCCESS;
+
+    sgx_report_t report;
+    ret = sgx_create_report(NULL, NULL, &report);
+    if(ret != SGX_SUCCESS){oPrintStatus(ret); return;}
 
     *response = 100; //initialization failure
     if( not initialized){
