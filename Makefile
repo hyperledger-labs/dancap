@@ -102,7 +102,7 @@ endif
 
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
-App_Name := numguess
+App_Name := hello
 
 ######## Enclave Settings ########
 

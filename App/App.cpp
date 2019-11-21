@@ -65,14 +65,11 @@ int main()
     sgx_launch_token_t token = { 0 };
     int updated = 0;
 
-    int guess=0;
-    int response=0;
-
-    std::cout << "Loading secret enclave ...";
+    std::cout << "Loading enclave ...\n";
     ret = sgx_create_enclave(ENCLAVE_NAME, SGX_DEBUG_FLAG, &token, &updated, \
             &global_eid, NULL);
 
-    if(ret != SGX_SUCCESS){
+    if (ret != SGX_SUCCESS) {
         std::cerr << "FAILED TO CREATE ENCLAVE. CODE: ";
         std::cerr << std::hex << ret << std::endl;
         return 1;
@@ -80,8 +77,6 @@ int main()
 
     std::cout << "\nSelecting Attestation Key\n";
     sgx_att_key_id_t key_id = {};
-    // Repro line below for suspected bug in select with NULL input
-    // ret = sgx_select_att_key_id(NULL, 0, &key_id);
     ret = sgx_select_att_key_id(
         g_ecdsa_p256_att_key_id_list,
         (uint32_t) sizeof(g_ecdsa_p256_att_key_id_list),
@@ -98,34 +93,33 @@ int main()
             std::cerr << "ERR: Unknown error\n";
     }
 
-    std::cout << "\nWelcome to Top Secret Number Guess\n";
-    std::cout << "The number is between 0 and 255.\n";
-
-    while(true){
-        std::cout << "Enter Guess: ";
-        std::cin >> guess; 
-        ret =  ecall_Guess(global_eid, guess, &response);
-        if( ret != SGX_SUCCESS){
-            std::cerr << "ENCLAVE FAILURE!!!\n";
-            std::cerr << ret << std::endl;
-        }
-
-        //Check failure condition
-        if( response > 99 ) { 
-            printErrorCode(response); 
-            std::cout << "Response: " << response << std::endl;
-            break;
-        }
-        //Check hints
-        if( response < 0) {
-            std::cout << "Bad Guess -- Too low.\n";
-        } else if( response==0 ) {
-            std::cout << "Good Guess!!!\n";
-            break;
-        } else if(response >0) {
-            std::cout << "Bad Guess -- Too high.\n";  
-        }
+    std::cout << "Initializing quote\n";
+    sgx_target_info_t targetInfo = {0};
+    ret = sgx_init_quote_ex(&key_id, &targetInfo, NULL, NULL);
+    switch(ret){
+        case SGX_SUCCESS:
+            std::cout << "Quote initialization succeeded\n"; break;
+        default:
+            std::cerr << "ERR: Unknown error initializing quote\n";
     }
+
+    std::cout << "Request report from enclave\n";
+    sgx_report_t report = {0};
+    int retval=0;
+    ret =  ecall_Hello(global_eid, &retval, &targetInfo, &report);
+
+    if (ret == SGX_SUCCESS) {
+        std::cout << "Enclave call returned without internal error\n";
+        if (retval == 1) {
+            std::cout << "Report created successfully\n";
+        } else {
+            std::cerr << "Report creation failed within enclave";
+        }
+    } else {
+        std::cerr << "Enclave call failed\n";
+        std::cerr << ret << std::endl;
+    }
+
     return 0;
 }
 

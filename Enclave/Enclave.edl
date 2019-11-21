@@ -1,10 +1,10 @@
 enclave {
-//    from "sgx_tae_service.edl" import *;	
+    include "sgx_report.h"
 
     trusted {
-    	public void ecall_Guess(int guess, [out]int* response);
+        public int ecall_Hello([in] sgx_target_info_t *targetInfo, [out] sgx_report_t *report);
     };
-    
+
     untrusted {
         void oPrintStatus(sgx_status_t statusCode);
     };
