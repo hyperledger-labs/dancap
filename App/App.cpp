@@ -88,11 +88,31 @@ int main()
     size_t key_size = 0;
 
     ret = sgx_init_quote_ex(&key_id, &target_info, &key_size, NULL);
-    if (ret != SGX_SUCCESS || key_size < 1){
-        PRINTERR << "Failed to discover pubkey size\n";
+    switch(ret){
+        case SGX_SUCCESS:
+            std::cout << "Pubkey ID size " << key_size << "\n"; break;
+        case SGX_ERROR_INVALID_PARAMETER:
+            PRINTERR << "Check key inputs\n"; break;
+        case SGX_ERROR_BUSY:
+        case SGX_ERROR_SERVICE_UNAVAILABLE:
+        case SGX_ERROR_SERVICE_TIMEOUT:
+            PRINTERR << "SGX/AE service error\n"; break;
+        case SGX_ERROR_OUT_OF_MEMORY:
+        case SGX_ERROR_OUT_OF_EPC:
+            PRINTERR << "Out of memory/EPC\n"; break;
+        case SGX_ERROR_NETWORK_FAILURE:
+            PRINTERR << "Network error\n"; break;
+        case SGX_ERROR_UPDATE_NEEDED:
+        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
+            PRINTERR << "TCB problem\n"; break;
+        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
+        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
+            PRINTERR << "Attestation key problem\n"; break;
+        default:
+            PRINTERR << "Unknown error\n";
+            PRINTERR << "Failed to discover pubkey size\n";
         return 1;
     }
-    std::cout << "Pubkey ID size " << key_size << "\n";
     uint8_t *pubkey_id = new uint8_t[key_size];
 
     std::cout << "Initializing quote...\n";
