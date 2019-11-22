@@ -113,6 +113,7 @@ int main()
             PRINTERR << "Failed to discover pubkey size\n";
         return 1;
     }
+    if (key_size < 1) return 1;
     uint8_t *pubkey_id = new uint8_t[key_size];
 
     std::cout << "Initializing quote...\n";
