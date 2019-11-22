@@ -118,7 +118,8 @@ int main()
         case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
             PRINTERR << "Attestation key problem\n"; break;
         default:
-            PRINTERR << "Unknown error initializing quote\n";
+            PRINTERR << "Unknown error\n";
+            return 1;
     }
 
     std::cout << "Requesting report from enclave...\n";
@@ -138,6 +139,58 @@ int main()
         PRINTERR << ret << std::endl;
     }
 
+    std::cout << "Getting quote size...\n";
+    uint32_t quote_size = 0;
+    ret = sgx_get_quote_size_ex(&key_id, &quote_size);
+    switch(ret){
+        case SGX_SUCCESS:
+            std::cout << "Retrieved quote size\n"; break;
+        case SGX_ERROR_INVALID_PARAMETER:
+            PRINTERR << "Invalid parameter - Check inputs\n"; break;
+        case SGX_ERROR_ATT_KEY_UNINITIALIZED:
+            PRINTERR << "Attestation key uninitialized - init quote again\n";
+            //TODO: retry sgx_init_quote_ex(..)
+            break;
+        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
+            PRINTERR << "Unsupported attestation key\n"; break;
+        default:
+            PRINTERR << "Unknown error\n";
+            return 1;
+    }
+
+    std::cout << "Getting quote...\n";
+    uint8_t *quote = new uint8_t[quote_size];
+    ret = sgx_get_quote_ex(&report, &key_id, NULL,
+            quote, quote_size);
+            //reinterpret_cast<sgx_quote_t *>(&quote[0]), quote_size);
+    switch(ret){
+        case SGX_SUCCESS:
+            std::cout << "Retrieved quote successfully\n"; break;
+        case SGX_ERROR_INVALID_PARAMETER:
+            PRINTERR << "Check inputs\n"; break;
+        case SGX_ERROR_BUSY:
+        case SGX_ERROR_SERVICE_UNAVAILABLE:
+        case SGX_ERROR_SERVICE_TIMEOUT:
+            //TODO: retry
+            PRINTERR << "SGX/AE service error\n"; break;
+        case SGX_ERROR_OUT_OF_MEMORY:
+        case SGX_ERROR_OUT_OF_EPC:
+            PRINTERR << "Out of memory/EPC\n"; break;
+        case SGX_ERROR_NETWORK_FAILURE:
+            PRINTERR << "Network error\n"; break;
+        case SGX_ERROR_UPDATE_NEEDED:
+        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
+            PRINTERR << "TCB problem\n"; break;
+        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
+        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
+            PRINTERR << "Attestation key problem\n"; break;
+        default:
+            PRINTERR << "Unknown error\n";
+            return 1;
+    }
+
+    delete pubkey_id;
+    delete quote;
     std::cout << "\nCOMPLETED\n\n";
     return 0;
 }
