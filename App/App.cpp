@@ -5,6 +5,7 @@
 
 
 #define ENCLAVE_NAME "enclave.signed.so"
+#define PRINTERR std::cerr << "ERR: "
 sgx_enclave_id_t global_eid = 0;
 
 const uint8_t g_ecdsa_p256_att_key_id_list[] = {
@@ -47,35 +48,24 @@ void oPrintStatus(sgx_status_t code){
     std::cout << "Enclave returned status: " << code << std::endl;;
 }
 
-void printErrorCode(int code){
-    switch(code){
-        case 100: std::cout << "Initialization Failure\n"; break;
-        case 110: std::cout << "Increment Counter Failure\n"; break;
-        case 120: std::cout << "Get Time Failure\n"; break;
-        case 130: std::cout << "Attempt limit exceeded.\n"; break;
-        case 140: std::cout << "Spacetime Anomaly check tardis diagnostics.\n"; break;
-        case 150: std::cout << "Time limit exceeded. You are too slow.\n"; break;
-        default: std::cout << "Unknown Error\n";
-    }
-}
-
 int main()
 {
     sgx_status_t ret = SGX_SUCCESS;
     sgx_launch_token_t token = { 0 };
     int updated = 0;
 
-    std::cout << "Loading enclave ...\n";
+    std::cout << "Loading secret enclave ...\n";
     ret = sgx_create_enclave(ENCLAVE_NAME, SGX_DEBUG_FLAG, &token, &updated, \
             &global_eid, NULL);
 
     if (ret != SGX_SUCCESS) {
-        std::cerr << "FAILED TO CREATE ENCLAVE. CODE: ";
-        std::cerr << std::hex << ret << std::endl;
+        PRINTERR << "FAILED TO CREATE ENCLAVE. CODE: ";
+        PRINTERR << std::hex << ret << std::endl;
         return 1;
     }
+    std::cout << "Enclave loaded\n";
 
-    std::cout << "\nSelecting Attestation Key\n";
+    std::cout << "\nSelecting Attestation Key...\n";
     sgx_att_key_id_t key_id = {};
     ret = sgx_select_att_key_id(
         g_ecdsa_p256_att_key_id_list,
@@ -86,40 +76,69 @@ int main()
         case SGX_SUCCESS:
             std::cout << "Key selected\n"; break;
         case SGX_ERROR_INVALID_PARAMETER:
-            std::cerr << "ERR: Malformed Key List\n"; break;
+            PRINTERR << "Malformed Key List\n"; break;
         case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-            std::cerr << "ERR: Unsupported Key\n"; break;
+            PRINTERR << "Unsupported Key\n"; break;
         default:
-            std::cerr << "ERR: Unknown error\n";
+            PRINTERR << "Unknown error\n";
     }
 
-    std::cout << "Initializing quote\n";
-    sgx_target_info_t targetInfo = {0};
-    ret = sgx_init_quote_ex(&key_id, &targetInfo, NULL, NULL);
+    std::cout << "Discovering pubkey ID size...\n";
+    sgx_target_info_t target_info = {0};
+    size_t key_size = 0;
+
+    ret = sgx_init_quote_ex(&key_id, &target_info, &key_size, NULL);
+    if (ret != SGX_SUCCESS || key_size < 1){
+        PRINTERR << "Failed to discover pubkey size\n";
+        return 1;
+    }
+    std::cout << "Pubkey ID size " << key_size << "\n";
+    uint8_t *pubkey_id = new uint8_t[key_size];
+
+    std::cout << "Initializing quote...\n";
+    ret = sgx_init_quote_ex(&key_id, &target_info, &key_size, pubkey_id);
     switch(ret){
         case SGX_SUCCESS:
             std::cout << "Quote initialization succeeded\n"; break;
+        case SGX_ERROR_INVALID_PARAMETER:
+            PRINTERR << "Check key inputs\n"; break;
+        case SGX_ERROR_BUSY:
+        case SGX_ERROR_SERVICE_UNAVAILABLE:
+        case SGX_ERROR_SERVICE_TIMEOUT: 
+            PRINTERR << "SGX/AE service error\n"; break;
+        case SGX_ERROR_OUT_OF_MEMORY:
+        case SGX_ERROR_OUT_OF_EPC:
+            PRINTERR << "Out of memory/EPC\n"; break;
+        case SGX_ERROR_NETWORK_FAILURE:
+            PRINTERR << "Network error\n"; break;
+        case SGX_ERROR_UPDATE_NEEDED:
+        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
+            PRINTERR << "TCB problem\n"; break;
+        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
+        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
+            PRINTERR << "Attestation key problem\n"; break;
         default:
-            std::cerr << "ERR: Unknown error initializing quote\n";
+            PRINTERR << "Unknown error initializing quote\n";
     }
 
-    std::cout << "Request report from enclave\n";
+    std::cout << "Requesting report from enclave...\n";
     sgx_report_t report = {0};
-    int retval=0;
-    ret =  ecall_Hello(global_eid, &retval, &targetInfo, &report);
+    int retval = 0;
+    ret =  ecall_Hello(global_eid, &retval, &target_info, &report);
 
     if (ret == SGX_SUCCESS) {
         std::cout << "Enclave call returned without internal error\n";
         if (retval == 1) {
             std::cout << "Report created successfully\n";
         } else {
-            std::cerr << "Report creation failed within enclave";
+            PRINTERR << "Report creation failed within enclave";
         }
     } else {
-        std::cerr << "Enclave call failed\n";
-        std::cerr << ret << std::endl;
+        PRINTERR << "Enclave call failed\n";
+        PRINTERR << ret << std::endl;
     }
 
+    std::cout << "\nCOMPLETED\n\n";
     return 0;
 }
 
