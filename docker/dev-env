@@ -5,11 +5,11 @@
 #
 # Build docker image:
 #   (From the root directory of the repo)
-#   $ docker build . -f docker/dev-env -t numguess
+#   $ docker build . -f docker/dev-env -t dancap
 #
 # Run interactive container for libsnark compilation and execution
 #   (From the root directory of the repo)
-#   $ docker run -v $(pwd):/project/numguess -it numguess /bin/bash
+#   $ docker run -v $(pwd):/project/dancap -it dancap /bin/bash
 #
 
 
