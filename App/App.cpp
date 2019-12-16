@@ -64,11 +64,11 @@ int main()
     }
     std::cout << "Enclave loaded\n";
 
-    std::cout << "\nSelecting Attestation Key...\n";
+    std::cout << "\nAttempting to auto-select Attestation Key...\n";
     sgx_att_key_id_t key_id = {};
     ret = sgx_select_att_key_id(
-        g_ecdsa_p256_att_key_id_list,
-        (uint32_t) sizeof(g_ecdsa_p256_att_key_id_list),
+        NULL,
+        0,
         &key_id);
 
     switch(ret){
@@ -80,6 +80,26 @@ int main()
             PRINTERR << "Unsupported Key\n"; break;
         default:
             PRINTERR << "Unknown error\n";
+    }
+
+    if (ret != SGX_SUCCESS){
+        std::cerr << "Auto select failed... ";
+        std::cout << "\nSelecting Attestation Key using key ID list...\n";
+        ret = sgx_select_att_key_id(
+                g_ecdsa_p256_att_key_id_list,
+                (uint32_t) sizeof(g_ecdsa_p256_att_key_id_list),
+                &key_id);
+
+        switch(ret){
+            case SGX_SUCCESS:
+                std::cout << "Key selected\n"; break;
+            case SGX_ERROR_INVALID_PARAMETER:
+                PRINTERR << "Malformed Key List\n"; break;
+            case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
+                PRINTERR << "Unsupported Key\n"; break;
+            default:
+                PRINTERR << "Unknown error\n";
+        }
     }
 
     std::cout << "Discovering pubkey ID size...\n";
