@@ -2,12 +2,12 @@
 #include "sgx_urts.h"
 #include "Enclave_u.h"
 #include "sgx_uae_quote_ex.h"
-
+#include "handle_sgx_error.h"
 
 #define ENCLAVE_NAME "enclave.signed.so"
-#define PRINTERR std::cerr << "ERR: " << std::hex << ret << std::dec << " "
 sgx_enclave_id_t global_eid = 0;
 
+// This is a default key ID list copied from the SGX SDK examples
 const uint8_t g_ecdsa_p256_att_key_id_list[] = {
     0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x8c, 0x4f,
@@ -54,52 +54,25 @@ int main()
     sgx_launch_token_t token = { 0 };
     int updated = 0;
 
-    std::cout << "Loading secret enclave ...\n";
+    std::cout << "Loading enclave ...\n";
     ret = sgx_create_enclave(ENCLAVE_NAME, SGX_DEBUG_FLAG, &token, &updated, \
             &global_eid, NULL);
 
-    if (ret != SGX_SUCCESS) {
-        PRINTERR << "FAILED TO CREATE ENCLAVE. CODE: ";
-        return 1;
-    }
-    std::cout << "Enclave loaded\n";
+    if (!HandleSgxErr(ret)) return(1);
 
-    std::cout << "\nAttempting to auto-select Attestation Key...\n";
+    std::cout << "\nAttempting to auto-select Attestation Key ID...\n";
     sgx_att_key_id_t key_id = {};
-    ret = sgx_select_att_key_id(
-        NULL,
-        0,
-        &key_id);
-
-    switch(ret){
-        case SGX_SUCCESS:
-            std::cout << "Key selected\n"; break;
-        case SGX_ERROR_INVALID_PARAMETER:
-            PRINTERR << "Malformed Key List\n"; break;
-        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-            PRINTERR << "Unsupported Key\n"; break;
-        default:
-            PRINTERR << "Unknown error\n";
-    }
+    ret = sgx_select_att_key_id( NULL, 0, &key_id);
+    HandleSgxErr(ret);
 
     if (ret != SGX_SUCCESS){
         std::cerr << "Auto select failed... ";
-        std::cout << "\nSelecting Attestation Key using key ID list...\n";
+        std::cout << "\nSelecting Attestation Key using example key ID list...\n";
         ret = sgx_select_att_key_id(
                 g_ecdsa_p256_att_key_id_list,
                 (uint32_t) sizeof(g_ecdsa_p256_att_key_id_list),
                 &key_id);
-
-        switch(ret){
-            case SGX_SUCCESS:
-                std::cout << "Key selected\n"; break;
-            case SGX_ERROR_INVALID_PARAMETER:
-                PRINTERR << "Malformed Key List\n"; break;
-            case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-                PRINTERR << "Unsupported Key\n"; break;
-            default:
-                PRINTERR << "Unknown error\n";
-        }
+        if (!HandleSgxErr(ret)) return(1);
     }
 
     std::cout << "Discovering pubkey ID size...\n";
@@ -107,136 +80,41 @@ int main()
     size_t key_size = 0;
 
     ret = sgx_init_quote_ex(&key_id, &target_info, &key_size, NULL);
-    switch(ret){
-        case SGX_SUCCESS:
-            std::cout << "Pubkey ID size " << key_size << "\n"; break;
-        case SGX_ERROR_INVALID_PARAMETER:
-            PRINTERR << "Check key inputs\n"; break;
-        case SGX_ERROR_BUSY:
-        case SGX_ERROR_SERVICE_UNAVAILABLE:
-        case SGX_ERROR_SERVICE_TIMEOUT:
-            PRINTERR << "SGX/AE service error\n"; break;
-        case SGX_ERROR_OUT_OF_MEMORY:
-        case SGX_ERROR_OUT_OF_EPC:
-            PRINTERR << "Out of memory/EPC\n"; break;
-        case SGX_ERROR_NETWORK_FAILURE:
-            PRINTERR << "Network error\n"; break;
-        case SGX_ERROR_UPDATE_NEEDED:
-        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
-            PRINTERR << "TCB problem\n"; break;
-        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
-            PRINTERR << "Attestation key problem\n"; break;
-        default:
-            PRINTERR << "Unknown error\n";
-            PRINTERR << "Failed to discover pubkey size\n";
-        return 1;
-    }
-    if (key_size <1) { PRINTERR << "Bad Key Size\n"; return 1;}
+    if (!HandleSgxErr(ret)) return(1);
+
+    if (key_size <1) { std::cerr << "Bad Key Size\n"; return 1;}
     uint8_t *pubkey_id = new uint8_t[key_size];
 
     std::cout << "Initializing quote...\n";
     ret = sgx_init_quote_ex(&key_id, &target_info, &key_size, pubkey_id);
-    switch(ret){
-        case SGX_SUCCESS:
-            std::cout << "Quote initialization succeeded\n"; break;
-        case SGX_ERROR_INVALID_PARAMETER:
-            PRINTERR << "Check key inputs\n"; break;
-        case SGX_ERROR_BUSY:
-            PRINTERR << "Busy\n"; break;
-        case SGX_ERROR_SERVICE_UNAVAILABLE:
-            PRINTERR << "Service Unavailable\n"; break;
-        case SGX_ERROR_SERVICE_TIMEOUT: 
-            PRINTERR << "Service Timeout\n"; break;
-        case SGX_ERROR_OUT_OF_MEMORY:
-        case SGX_ERROR_OUT_OF_EPC:
-            PRINTERR << "Out of memory/EPC\n"; break;
-        case SGX_ERROR_NETWORK_FAILURE:
-            PRINTERR << "Network error\n"; break;
-        case SGX_ERROR_UPDATE_NEEDED:
-        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
-            PRINTERR << "TCB problem\n"; break;
-        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
-            PRINTERR << "Attestation key problem\n"; break;
-        case SGX_ERROR_PLATFORM_CERT_UNAVAILABLE:
-            PRINTERR << "PCK Cert for the platform is not available\n"; break;
-        default:
-            PRINTERR << "Unknown error\n";
-            return 1;
-    }
+    if (!HandleSgxErr(ret)) return(1);
 
     std::cout << "Requesting report from enclave...\n";
     sgx_report_t report = {0};
     int retval = 0;
     ret =  ecall_Hello(global_eid, &retval, &target_info, &report);
 
-    if (ret == SGX_SUCCESS) {
-        std::cout << "Enclave call returned without internal error\n";
-        if (retval == SGX_SUCCESS) {
-            std::cout << "Report created successfully\n";
-        } else {
-            ret = (sgx_status_t)retval;  //Copy error code for print macro
-            PRINTERR << "Report creation failed within enclave";
-        }
-    } else {
-        PRINTERR << "Enclave call failed\n";
-        PRINTERR << ret << std::endl;
+    if (!HandleSgxErr(ret)) return(1);
+    std::cout << "Enclave call returned without sgx error\n";
+
+    if (!HandleSgxErr((sgx_status_t) retval)){
+        std::cerr << "Report creation failed within enclave";
+        return(1);
     }
 
     std::cout << "Getting quote size...\n";
     uint32_t quote_size = 0;
     ret = sgx_get_quote_size_ex(&key_id, &quote_size);
-    switch(ret){
-        case SGX_SUCCESS:
-            std::cout << "Retrieved quote size\n"; break;
-        case SGX_ERROR_INVALID_PARAMETER:
-            PRINTERR << "Invalid parameter - Check inputs\n"; break;
-        case SGX_ERROR_ATT_KEY_UNINITIALIZED:
-            PRINTERR << "Attestation key uninitialized - init quote again\n";
-            //TODO: retry sgx_init_quote_ex(..)
-            break;
-        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-            PRINTERR << "Unsupported attestation key\n"; break;
-        default:
-            PRINTERR << "Unknown error\n";
-            return 1;
-    }
+    if (!HandleSgxErr(ret)) return(1);
 
     std::cout << "Getting quote...\n";
     uint8_t *quote = new uint8_t[quote_size];
-    ret = sgx_get_quote_ex(&report, &key_id, NULL,
-            quote, quote_size);
-            //reinterpret_cast<sgx_quote_t *>(&quote[0]), quote_size);
-    switch(ret){
-        case SGX_SUCCESS:
-            std::cout << "Retrieved quote successfully\n"; break;
-        case SGX_ERROR_INVALID_PARAMETER:
-            PRINTERR << "Check inputs\n"; break;
-        case SGX_ERROR_BUSY:
-        case SGX_ERROR_SERVICE_UNAVAILABLE:
-        case SGX_ERROR_SERVICE_TIMEOUT:
-            //TODO: retry
-            PRINTERR << "SGX/AE service error\n"; break;
-        case SGX_ERROR_OUT_OF_MEMORY:
-        case SGX_ERROR_OUT_OF_EPC:
-            PRINTERR << "Out of memory/EPC\n"; break;
-        case SGX_ERROR_NETWORK_FAILURE:
-            PRINTERR << "Network error\n"; break;
-        case SGX_ERROR_UPDATE_NEEDED:
-        case SGX_ERROR_UNRECOGNIZED_PLATFORM:
-            PRINTERR << "TCB problem\n"; break;
-        case SGX_ERROR_UNSUPPORTED_ATT_KEY_ID:
-        case SGX_ERROR_ATT_KEY_CERTIFICATION_FAILURE:
-            PRINTERR << "Attestation key problem\n"; break;
-        default:
-            PRINTERR << "Unknown error\n";
-            return 1;
-    }
+    ret = sgx_get_quote_ex(&report, &key_id, NULL, quote, quote_size);
+    if (!HandleSgxErr(ret)) return(1);
 
     delete pubkey_id;
     delete quote;
     std::cout << "\nCOMPLETED\n\n";
-    return 0;
+    return(0);
 }
 
