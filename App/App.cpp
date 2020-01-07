@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "sgx_urts.h"
 #include "Enclave_u.h"
 #include "sgx_uae_quote_ex.h"
@@ -111,6 +112,20 @@ int main()
     uint8_t *quote = new uint8_t[quote_size];
     ret = sgx_get_quote_ex(&report, &key_id, NULL, quote, quote_size);
     if (!HandleSgxErr(ret)) return(1);
+
+    {   //Output attestation as binary file to be consumed by verifier
+        using namespace std;
+        ofstream attestation_file ("attestation.bytes", ios::out | ios::binary);
+        if (attestation_file.is_open()) {
+            for (int i=0; i < quote_size; i++){
+                attestation_file << quote[i];
+            }
+            attestation_file.close();
+            cout << "Wrote attestation to file\n";
+        } else {
+            cerr << "ERROR: Unable to write attestation to file\n";
+        }
+    }
 
     delete pubkey_id;
     delete quote;
