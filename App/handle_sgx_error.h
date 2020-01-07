@@ -3,9 +3,9 @@
 // In some cases the application could retry after these failures.
 #include <iostream>
 #include "sgx_error.h"
-using namespace std;
 
 bool HandleSgxErr(sgx_status_t ret){
+    using namespace std;
     if (ret == SGX_SUCCESS) { cout << "SUCCESS\n"; return(1);}
     cerr << hex;
     switch(ret){
@@ -285,5 +285,5 @@ bool HandleSgxErr(sgx_status_t ret){
         cerr << "UNKNOWN SGX ERROR:" << ret << "\n";
     }
     cerr << dec;
-return(false);
+    return(false);
 }
