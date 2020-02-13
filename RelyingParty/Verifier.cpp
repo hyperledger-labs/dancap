@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
-// #include "sgx_dcap_quoteverify.h"
+#include "sgx_dcap_quoteverify.h"
 
 int main() {
     using namespace std;
@@ -29,25 +29,25 @@ int main() {
     quote_file.close();
 
 
-    // TODO verify quote
+    // verify quote
 
     time_t now = time(NULL);
     uint32_t expiration_status = 0;
-    /*   
-    sgx_qv_result_t verification_result = SGX_QL_QV_RESULT_UNSPECIFIED;
-    qutoe3_error_t result = SGX_QL_ERROR_UNEXPECTED;
+       
+    sgx_ql_qv_result_t verification_result = SGX_QL_QV_RESULT_UNSPECIFIED;
+    quote3_error_t result = SGX_QL_ERROR_UNEXPECTED;
 
     result = sgx_qv_verify_quote( 
-            quote,      // Quote
-            quote_size, // Quote size
-            NULL,       // Collateral. NULL asks the library to find it.
-            now,        // Check expiration as of this date
+            (uint8_t*) quote,       // Quote
+            quote_size,             // Quote size
+            NULL,                   // Collateral. NULL asks the library to find it.
+            now,                    // Check expiration as of this date
             &expiration_status,     // Receive expiration indication;
             &verification_result,   // Result of verification check
-            NULL,       // Optional Report Info
-            0,          // Optional supplemental data size
-            NULL,       // Optional supplemental data
-            )
+            NULL,                   // Optional Report Info
+            0,                      // Optional supplemental data size
+            NULL                    // Optional supplemental data
+            );
 
     if (result != SGX_QL_SUCCESS){
             cerr << "ERROR: Quote verification FAILED with error: " << hex << result;
@@ -55,11 +55,11 @@ int main() {
             cerr << dec;
             return 1;
     } else {
-            cout << "Success: Quote verification PASSED\n;
+            cout << "Success: Quote verification PASSED\n";
             cout << "\n Verification result code: " << hex << verification_result << endl;
             cout << dec;
     }
-    */
+ 
 
     // TODO: Verify report data
 
