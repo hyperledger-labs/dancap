@@ -102,6 +102,14 @@ endif
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
 App_Name := hello
+
+######## Verifier Settings ########
+DCAP_lib_path := /usr/lib/x86_64-linux-gnu
+DCAP_lib_name := dcap_quoteverify
+Verifier_Include_Paths := -IInclude -I$(SGX_SDK)/include
+Verifier_Link_Flags := -L$(DCAP_lib_path) -l$(DCAP_lib_name) $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name)
+Verifier_Cpp_Flags := $(Verifier_Include_Paths) -std=c++11
+Verifier_Cpp_Objects := RelyingParty/Verifier.o
 Verifier_Name := verifier 
 
 ######## Enclave Settings ########
@@ -211,9 +219,13 @@ $(App_Name): App/Enclave_u.o $(App_Cpp_Objects)
 	@echo "LINK =>  $@"
 
 ######## Verifier Objects #######
-$(Verifier_Name): RelyingParty/Verifier.cpp
-	@$(CXX) $(App_Cpp_Flags) $< -o $@
-	@echo "CXX  <=  $<"
+RelyingParty/Verifier.o: RelyingParty/Verifier.cpp
+	@$(CXX) $(Verifier_Cpp_Flags) -c $< -o $@
+	@echo "CXX Verifier Object  <=  $<"
+
+$(Verifier_Name): RelyingParty/Verifier.o
+	@$(CXX) $^ -o $@ $(Verifier_Link_Flags)
+	@echo "LINK Verifier <=  $<"
 
 ######## Enclave Objects ########
 
@@ -240,4 +252,5 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 .PHONY: clean
 
 clean:
-	@rm -f $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) $(Verifier_Name) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.*
+	@rm -f $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.*
+	@rm -f $(Verifier_Name) $(Verifier_Cpp_Objects)
