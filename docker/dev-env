@@ -1,5 +1,5 @@
 # Description:
-#   Creates a container that can build libsnark and enable development
+#   Creates a container that can build the project and enable development
 #   from the host by mapping the directory between the host and the container.
 #
 #
@@ -7,7 +7,7 @@
 #   (From the root directory of the repo)
 #   $ docker build . -f docker/dev-env -t dancap
 #
-# Run interactive container for libsnark compilation and execution
+# Run interactive container for compilation and execution
 #   (From the root directory of the repo)
 #   $ docker run -v $(pwd):/project/dancap -it dancap /bin/bash
 #
