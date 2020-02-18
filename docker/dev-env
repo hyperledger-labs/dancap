@@ -33,28 +33,17 @@ RUN apt-get update && \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-#    git \
-#    libgmp3-dev \
-#    libprocps4-dev \
-#    python-markdown \
-#    libboost-all-dev \
-#    libssl-dev \
 
 # Add 01.org to apt for SGX packages
 RUN echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main" >> /etc/apt/sources.list.d/intel-sgx.list
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update 
 
-# SGX common library and SDK are installed in /opt/intel directory.
-# Installation of SGX libsgx-common packages requires /etc/init directory. 
-# In docker image this directory doesn't exist.
-# Hence creating /etc/init directory.
-RUN mkdir -p /opt/intel \
- && mkdir -p /etc/init
-WORKDIR /opt/intel
-
 # Install SGX common library
 RUN apt-get install -y -q libsgx-enclave-common
+
+# SGX SDK is installed in /opt/intel directory.
+WORKDIR /opt/intel
 
 # Install SGX SDK
 RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.7.101.3.bin \ 
