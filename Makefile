@@ -105,7 +105,11 @@ App_Name := hello
 
 ######## Verifier Settings ########
 DCAP_lib_path := /usr/lib/x86_64-linux-gnu
-DCAP_lib_name := dcap_quoteverify
+ifneq ("$(wildcard $(DCAP_lib_path)/libdcap_quoteverify)","")
+	DCAP_lib_name := dcap_quoteverify
+else
+	DCAP_lib_name := sgx_dcap_quoteverify
+endif
 Verifier_Include_Paths := -IInclude -I$(SGX_SDK)/include
 Verifier_Link_Flags := -L$(DCAP_lib_path) -l$(DCAP_lib_name) $(SGX_COMMON_CFLAGS) -L$(SGX_LIBRARY_PATH) -l$(Urts_Library_Name)
 Verifier_Cpp_Flags := $(Verifier_Include_Paths) -std=c++11
