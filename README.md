@@ -40,7 +40,7 @@ Quote verification
 
 1. run (Note: when run within the container only simulation mode will work.
 However if you build in HW mode the binary will work on Ubuntu natively.)
-    ```./hello```
+    ```./attestor```
 
 ## Ubuntu 18.04
 1. Install machine per instructions in Cloud Provisioning
@@ -51,7 +51,7 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
     ```SGX_MODE=SIM make clean && make```
 
 1. run
-    ```./hello```
+    ```./attestor```
 
 # Cloud provisioning
 ## Azure Confidential Compute
@@ -80,6 +80,7 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
     removing the one we don't want.
     We want this one:  
     ```$ /usr/lib/libdcap_quoteprov.so```
+
     we do NOT want this one:  
     ```~$ /opt/intel/libsgx-enclave-common/aesm/libdcap_quoteprov.so~```
 

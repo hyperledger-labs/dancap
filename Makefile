@@ -101,7 +101,7 @@ endif
 
 App_Cpp_Objects := $(App_Cpp_Files:.cpp=.o)
 
-App_Name := hello
+App_Name := attestor
 
 ######## Verifier Settings ########
 DCAP_lib_path := /usr/lib/x86_64-linux-gnu
