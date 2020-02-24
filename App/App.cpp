@@ -121,7 +121,7 @@ int main()
                 attestation_file << quote[i];
             }
             attestation_file.close();
-            cout << "Wrote attestation to file\n";
+            cout << "Wrote attestation to file. Bytes=" << quote_size << endl;
         } else {
             cerr << "ERROR: Unable to write attestation to file\n";
         }
