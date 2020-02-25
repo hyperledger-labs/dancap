@@ -1,3 +1,6 @@
+# Copyright contributors to Hyperledger Avalon
+# SPDX-License-Identifier: Apache-2.0
+#
 # Description:
 #   Creates a container that can build the project and enable development
 #   from the host by mapping the directory between the host and the container.

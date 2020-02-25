@@ -1,3 +1,5 @@
+// Copyright contributors to Hyperledger Avalon
+// SPDX-License-Identifier: Apache-2.0
 #include <iostream>
 #include <fstream>
 #include <time.h>

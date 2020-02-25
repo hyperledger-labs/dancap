@@ -1,3 +1,5 @@
+// Copyright contributors to Hyperledger Avalon
+// SPDX-License-Identifier: Apache-2.0
 #include "Enclave_t.h"
 #include "sgx_trts.h"
 #include "sgx_utils.h"
