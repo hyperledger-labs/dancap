@@ -2,3 +2,9 @@
 *_u.[h,c]
 *_t.[h,c]
 *.so
+*.swp
+
+# Ignore binaries and data
+attestor
+verifier
+attestation.bytes
