@@ -5,11 +5,11 @@
 #
 # Build docker image:
 #   (From the root directory of the repo)
-#   $ docker build . -f docker/dev-env -t dancap
+#   $ docker build . -f docker/dev-env -t dancap-dev-env
 #
 # Run interactive container for compilation and execution
 #   (From the root directory of the repo)
-#   $ docker run -v $(pwd):/project/dancap -it dancap /bin/bash
+#   $ docker run -v $(pwd):/project/dancap -it dancap-dev-env /bin/bash
 #
 
 
