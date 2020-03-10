@@ -1,0 +1,35 @@
+# Description:
+#   Creates a container that can build the project and enable development
+#   from the host by mapping the directory between the host and the container.
+#
+#
+# Build docker image:
+#   (From the root directory of the repo)
+#   $ docker build . -f docker/verifier-env -t dancap-verifier-env
+#
+# Run interactive container for compilation and execution
+#   (From the root directory of the repo)
+#   $ docker run -v $(pwd):/project/dancap -it dancap-verifier-env /bin/bash
+#
+
+
+FROM dancap-dev-env:latest
+
+WORKDIR /root
+
+RUN apt-get update && \
+    apt-get install -y \
+    systemd \
+    net-tools \
+    mlocate \
+    libsgx-dcap-default-qpl \
+#    sgx-dcap-pccs \
+ && rm -rf /var/lib/apt/lists/* \
+ && curl -s -S -o /tmp/setup-node.sh https://deb.nodesource.com/setup_13.x \
+ && chmod 755 /tmp/setup-node.sh \
+ && /tmp/setup-node.sh \
+ && apt-get install nodejs -y -q \
+ && rm /tmp/setup-node.sh \
+ && apt-get -y -q upgrade \
+ && apt-get clean
+
