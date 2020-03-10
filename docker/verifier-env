@@ -33,3 +33,5 @@ RUN apt-get update && \
  && apt-get -y -q upgrade \
  && apt-get clean
 
+# Configure QPL to use self-signed cert for local PCCS
+RUN echo USE_SECURE_CERT=FALSE >> /etc/sgx_default_qcnl.conf
