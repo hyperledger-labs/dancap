@@ -1,0 +1,5 @@
+#!/bin/sh
+# Copyright contributors to Hyperledger Avalon
+# SPDX-License-Identifier: Apache-2.0
+
+docker build . -f docker/verifier-env -t dancap-verifier-env

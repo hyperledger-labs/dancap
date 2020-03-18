@@ -23,15 +23,25 @@ RUN apt-get update && \
     net-tools \
     mlocate \
     libsgx-dcap-default-qpl \
-#    sgx-dcap-pccs \
  && rm -rf /var/lib/apt/lists/* \
  && curl -s -S -o /tmp/setup-node.sh https://deb.nodesource.com/setup_13.x \
  && chmod 755 /tmp/setup-node.sh \
  && /tmp/setup-node.sh \
  && apt-get install nodejs -y -q \
  && rm /tmp/setup-node.sh \
- && apt-get -y -q upgrade \
- && apt-get clean
+ && apt-get -y -q upgrade
 
 # Configure QPL to use self-signed cert for local PCCS
 RUN echo USE_SECURE_CERT=FALSE >> /etc/sgx_default_qcnl.conf
+
+# Install Provisioning Certificate Caching Service (PCCS)
+# TODO: The echo pipe is a workaround for PCCS v1.5.100.2 requiring an interactive install.
+#       Rework if/when pccs supports unattended install.
+RUN echo $http_proxy'\n'$https_proxy'\n'n'\n' | apt-get -y -q install sgx-dcap-pccs
+COPY docker/pccs-config/ /opt/intel/sgx-dcap-pccs/
+WORKDIR /opt/intel/sgx-dcap-pccs
+RUN pm2 update
+RUN pm2 start pccs_server.config.js
+
+# Cleanup
+RUN apt-get clean
