@@ -78,7 +78,7 @@ App_Name := attestor
 
 ######## Verifier Settings ########
 DCAP_lib_path := /usr/lib/x86_64-linux-gnu
-ifneq ("$(wildcard $(DCAP_lib_path)/libdcap_quoteverify)","")
+ifneq ("$(wildcard $(DCAP_lib_path)/libdcap_quoteverify.so)","")
 	DCAP_lib_name := dcap_quoteverify
 else
 	DCAP_lib_name := sgx_dcap_quoteverify
