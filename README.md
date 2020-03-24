@@ -57,7 +57,7 @@ From project root
 
 1. run the container - this drops you into a shell
 
-    `./run-container`
+    `./run-docker`
 
 1. build in hardware mode [default] or simulation mode
 
