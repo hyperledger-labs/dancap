@@ -59,16 +59,16 @@ From project root
 
     `./run-docker`
 
-1. build in hardware mode [default] or simulation mode
+1. build in simulation mode [default in the container] or hardware mode
 
     `make clean && make`
 
     or
 
-    `SGX_MODE=SIM make clean && make`
+    `make clean && SGX_MODE=HW make`
     
-    This will produce an enclave application, `attestor`, built for hardware or
-    simulation and a verifier which does not rely on hardware but does rely on
+    This will produce an enclave application, `attestor`, built for simulation or
+    hardware and a verifier which does not rely on hardware but does rely on
     DCAP services.
 
 ## Ubuntu 18.04
@@ -80,7 +80,7 @@ From project root
 
     or
 
-    `SGX_MODE=SIM make clean && make`
+    `make clean && SGX_MODE=SIM make`
 
 
 # Running
@@ -119,9 +119,9 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
 
         1. If necessary copy attestation.bytes to the verifier\'s host
 
-            I.e. if you are running the verifier on a different host than the attestor. The verifier will
-            look for the attestation in the same directory as the verifier binary. The project root (e.g.
-            /home/you/dancap) is mapped into the verifier container at /project/dancap.
+            I.e. if you are running the verifier on a different host than the attestor. The verifier
+            will look for the attestation in the same directory as the verifier binary. The project
+            root (e.g.  /home/you/dancap) is mapped into the verifier container at /project/dancap.
 
         1. Run the verifier from the container\'s shell
         
@@ -156,6 +156,18 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
     cd /opt/intel/sgx-dcap-pccs/
     pm2 start pccs_server.config.js
     ```
+
+    If you created the attestation using simulation expect an e01d
+    (SGX_QL_QUOTE_FORMAT_UNSUPPORTED). This is expected because the attestation is just simulated
+    and should not verify as an actual hardware attestation.
+
+    ```
+    root@aacd7eebf44a:/project/dancap# ./verifier
+    Reading 1116 bytes... Read attestation file successfully.
+    ERROR: Quote verification FAILED with error: e01d
+    Verification error code: a006
+    ```
+
 
 # Cloud Provisioning
 ## Azure Confidential Compute
