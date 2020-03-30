@@ -2,6 +2,7 @@
 # Copyright contributors to Hyperledger Avalon
 # SPDX-License-Identifier: Apache-2.0
 docker run \
+    --rm \
     -e http_proxy \
     -e https_proxy \
     --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
