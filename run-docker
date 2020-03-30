@@ -2,6 +2,7 @@
 # Copyright contributors to Hyperledger Avalon
 # SPDX-License-Identifier: Apache-2.0
 docker run \
+    --rm \
     --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
     -v $(pwd):/project/dancap\
     -it dancap-dev-env /bin/bash \
