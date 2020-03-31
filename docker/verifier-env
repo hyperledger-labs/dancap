@@ -42,6 +42,7 @@ COPY docker/pccs-config/ /opt/intel/sgx-dcap-pccs/
 WORKDIR /opt/intel/sgx-dcap-pccs
 RUN pm2 update
 RUN pm2 start pccs_server.config.js
+RUN pm2 startup systemd
 
 # Cleanup
 RUN apt-get clean
