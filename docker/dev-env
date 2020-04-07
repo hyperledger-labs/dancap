@@ -42,17 +42,18 @@ RUN echo "deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bio
 RUN wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add -
 RUN apt-get update 
 
-# Install SGX common library
-RUN apt-get install -y -q libsgx-enclave-common
+# Install SGX runtime components
+RUN apt-get install -y -q libsgx-quote-ex libsgx-urts
 
 # SGX SDK is installed in /opt/intel directory.
 WORKDIR /opt/intel
 
 # Install SGX SDK
-RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.7.101.3.bin \ 
- && chmod +x sgx_linux_x64_sdk_2.7.101.3.bin \
- && echo "yes" | ./sgx_linux_x64_sdk_2.7.101.3.bin \
- && rm sgx_linux_x64_sdk_2.7.101.3.bin \
+RUN wget https://download.01.org/intel-sgx/sgx-linux/2.9/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.9.100.2.bin \
+ && chmod +x sgx_linux_x64_sdk_2.9.100.2.bin \
+ && echo "yes" | ./sgx_linux_x64_sdk_2.9.100.2.bin \
+ && rm sgx_linux_x64_sdk_2.9.100.2.bin \
+ && ln -s /opt/intel/sgxsdk/lib64/libsgx_quote_ex_sim.so /opt/intel/sgxsdk/sdk_libs/ \
  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
 # Install SGX DCAP SDK
