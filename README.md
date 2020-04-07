@@ -183,13 +183,21 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
     `apt-get update && apt-get upgrade`
 
 1. Install the Intel(r) SGX SDK
+
 ```
-    wget \
-       https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.7.101.3.bin \
-       && chmod +x sgx_linux_x64_sdk_2.7.101.3.bin \
-       && echo "yes" | ./sgx_linux_x64_sdk_2.7.101.3.bin \
-       && rm sgx_linux_x64_sdk_2.7.101.3.bin \
-       && echo "source /opt/intel/sgxsdk/environment" >> /etc/environment`
+    sudo wget \
+        https://download.01.org/intel-sgx/sgx-linux/2.9/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.9.100.2.bin \
+        && sudo chmod +x sgx_linux_x64_sdk_2.9.100.2.bin \
+        && echo "yes" | sudo ./sgx_linux_x64_sdk_2.9.100.2.bin \
+        && sudo rm sgx_linux_x64_sdk_2.9.100.2.bin \
+        && sudo ln -s /opt/intel/sgxsdk/lib64/libsgx_quote_ex_sim.so /opt/intel/sgxsdk/sdk_libs/ \
+        && sudo sh -c 'echo ". /opt/intel/sgxsdk/environment" >> /etc/environment' 
+```
+
+1. Install the runtime quote (attestation) libraries
+
+```
+    sudo apt-get install libsgx-quote-ex
 ```
 
 1. Set library search order to pick up Azure's quote provider library rather
