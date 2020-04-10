@@ -1,10 +1,13 @@
 # Overview
-This is a proof of concept lab to explore attestation options for
-Hyperledger Avalon.
+This is a proof of concept lab to explore attestation options for Hyperledger
+Avalon. For background on attestation see [References](#references).
 
-The code can be used to learn the call flow for ECDSA based attestation. To a
-lesser degree, the project can also be used to verify the availability of
-attestation components on a host (e.g. SGX and libs).
+The lab provides an end to end example of the code, components, and
+configuration for generating and verifying remote attestations.  The code can be
+used to learn the call flow for ECDSA based attestation. It also provides
+dockerfiles that illustrate build and runtime dependencies.
+To a lesser degree, the project can also be used as a "known good" example when
+experimenting in new environments or different configuraitons.
 
 The code is written first and foremost to make the attestation API readable and
 simple. It is not written to be fully secure or robust. You can treat this as a
@@ -227,4 +230,11 @@ https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGen
 and here:
 
 https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteVerification/QvE/Include/qve_header.h
+
+# References
+* https://download.01.org/intel-sgx/dcap-1.1/linux/docs/Intel_SGX_DCAP_ECDSA_Orientation.pdf
+* https://software.intel.com/en-us/blogs/2018/12/09/an-update-on-3rd-party-attestation
+* https://01.org/intel-softwareguard-extensions/downloads/intel-sgx-dcap-1.6-release
+* https://software.intel.com/sites/default/files/managed/f1/b8/intel-sgx-support-for-third-party-attestation.pdf
+* https://github.com/intel/SGXDataCenterAttestationPrimitives
 
