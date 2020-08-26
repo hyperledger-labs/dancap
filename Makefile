@@ -84,6 +84,7 @@ Verifier_Link_Flags := -L$(DCAP_lib_path) -l$(DCAP_lib_name) $(SGX_COMMON_CFLAGS
 Verifier_Cpp_Flags := $(Verifier_Include_Paths) -std=c++11
 Verifier_Cpp_Objects := RelyingParty/Verifier.o
 Verifier_Name := verifier 
+Attestation_report_file_name := attestation.bytes
 
 ######## Enclave Settings ########
 
@@ -227,3 +228,4 @@ $(Signed_Enclave_Name): $(Enclave_Name)
 clean:
 	@rm -f $(App_Name) $(Enclave_Name) $(Signed_Enclave_Name) $(App_Cpp_Objects) App/Enclave_u.* $(Enclave_Cpp_Objects) Enclave/Enclave_t.*
 	@rm -f $(Verifier_Name) $(Verifier_Cpp_Objects)
+	@rm -f $(Attestation_report_file_name)
