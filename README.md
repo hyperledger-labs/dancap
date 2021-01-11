@@ -229,7 +229,7 @@ https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteGen
 
 and here:
 
-https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteVerification/QvE/Include/qve_header.h
+https://github.com/intel/SGXDataCenterAttestationPrimitives/blob/master/QuoteVerification/QvE/Include/sgx_qve_header.h
 
 # References
 * https://download.01.org/intel-sgx/dcap-1.1/linux/docs/Intel_SGX_DCAP_ECDSA_Orientation.pdf
