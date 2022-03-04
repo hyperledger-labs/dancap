@@ -177,7 +177,7 @@ However if you build in HW mode the binary will work on Ubuntu natively.)
     * Open Enclave SDK 
     ** This is necessary to get the attestation dependencies installed correctly within Azure.
     See:
-    https://software.intel.com/en-us/articles/get-started-with-azure-confidential-computing
+    https://www.intel.com/content/www/us/en/developer/articles/guide/get-started-with-azure-confidential-computing.html
     for more details.
 
 1. Upgrade the machine
